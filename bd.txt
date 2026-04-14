@@ -1,0 +1,53 @@
+CREATE TABLE users (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    age INT(3),
+    gender ENUM('male', 'female'),
+    full_name VARCHAR(150) NOT NULL,
+    registration_date DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cars (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    brand VARCHAR(50) NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    year INT(4) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    color VARCHAR(30),
+    type ENUM('легковая', 'внедорожник', 'спорткар') NOT NULL,
+    description TEXT,
+    image VARCHAR(255) DEFAULT NULL
+);
+
+INSERT INTO cars (brand, model, year, price, color, type, description) VALUES
+('Toyota', 'Camry', 2023, 2500000, 'Черный', 'легковая', 'Современный седан с отличными характеристиками'),
+('BMW', 'X5', 2024, 5500000, 'Белый', 'внедорожник', 'Премиальный внедорожник с полным приводом'),
+('Porsche', '911', 2023, 8500000, 'Оранжевый', 'спорткар', 'Легендарный спортивный автомобиль'),
+('Honda', 'CR-V', 2023, 2800000, 'Серый', 'внедорожник', 'Надежный семейный внедорожник'),
+('Audi', 'A4', 2024, 3200000, 'Синий', 'легковая', 'Немецкий премиальный седан'),
+('Ferrari', '488', 2023, 12000000, 'Красный', 'спорткар', 'Эксклюзивный итальянский спорткар'),
+('Kia', 'Rio', 2023, 1500000, 'Белый', 'легковая', 'Экономичный и практичный городской автомобиль'),
+('Land Rover', 'Range Rover', 2024, 7500000, 'Черный', 'внедорожник', 'Роскошный внедорожник премиум-класса');
+
+CREATE TABLE cart (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    car_id INT NOT NULL,
+    quantity INT DEFAULT 1,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
+CREATE TABLE feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('new', 'in_progress', 'resolved') DEFAULT 'new',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
