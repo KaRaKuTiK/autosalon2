@@ -36,7 +36,21 @@ function uploadImage($file, $carId) {
     // Генерация уникального имени
     $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
     $filename = uniqid('car_' . $carId . '_') . '.' . $extension;
-    $uploadPath = '../uploads/cars/' . $filename;
+    $uploadDir = '../uploads/cars/';
+    
+    // Создаем директорию, если ее нет
+    if (!is_dir($uploadDir)) {
+        if (!mkdir($uploadDir, 0755, true)) {
+            return ['success' => false, 'error' => 'Ошибка сервера: Не удалось создать директорию для загрузки файлов'];
+        }
+    }
+    
+    // Проверка прав на запись
+    if (!is_writable($uploadDir)) {
+        return ['success' => false, 'error' => 'Ошибка сервера: Папка загрузок недоступна для записи'];
+    }
+    
+    $uploadPath = $uploadDir . $filename;
     
     // Загрузка файла
     if (move_uploaded_file($file['tmp_name'], $uploadPath)) {

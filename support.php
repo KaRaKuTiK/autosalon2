@@ -1094,5 +1094,7 @@ try {
         // Обновляем статус при загрузке
         updateOnlineStatus();
     </script>
+
+    <?php include 'chat_widget.php'; ?>
 </body>
 </html>

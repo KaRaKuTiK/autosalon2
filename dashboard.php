@@ -733,7 +733,17 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="car-detail">
                                 <i class="fas fa-palette"></i>
-                                <span>Цвет: <strong><?php echo htmlspecialchars($car['color']); ?></strong></span>
+                                <span>Цвет: <strong><?php 
+                                    $colorMap = [
+                                        '🟢' => 'Зеленый', '🔴' => 'Красный', '🔵' => 'Синий',
+                                        '⚫' => 'Черный', '⚪' => 'Белый', '🟡' => 'Желтый',
+                                        '🟠' => 'Оранжевый', '🟣' => 'Фиолетовый', '🟤' => 'Коричневый',
+                                        '🟥' => 'Красный', '🟦' => 'Синий', '🟩' => 'Зеленый',
+                                        '🟧' => 'Оранжевый', '🟨' => 'Желтый', '🟪' => 'Фиолетовый', '🟫' => 'Коричневый'
+                                    ];
+                                    $colorText = strtr($car['color'], $colorMap);
+                                    echo htmlspecialchars($colorText ?: 'Не указан'); 
+                                ?></strong></span>
                             </div>
                             <div class="car-detail">
                                 <i class="fas fa-tag"></i>
@@ -794,5 +804,7 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
         });
     </script>
+
+    <?php include 'chat_widget.php'; ?>
 </body>
-</html>
+</html>

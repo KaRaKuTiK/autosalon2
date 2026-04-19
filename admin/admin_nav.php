@@ -61,7 +61,31 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <a href="feedback.php" class="nav-tab <?php echo $currentPage == 'feedback.php' ? 'active' : ''; ?>">
         <i class="fas fa-comments"></i> Обратная связь
     </a>
+    <a href="chat.php" class="nav-tab <?php echo $currentPage == 'chat.php' ? 'active' : ''; ?>" id="nav-chat-link" style="position:relative;">
+        <i class="fas fa-comment-dots"></i> Онлайн чат
+        <span id="nav-chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65em;font-weight:700;align-items:center;justify-content:center;border:2px solid #111;"></span>
+    </a>
     <a href="../index.php" class="nav-tab" style="margin-left: 20px;">
         <i class="fas fa-arrow-left"></i> На сайт
     </a>
 </div>
+<script>
+(function() {
+    function checkUnread() {
+        fetch('chat_api.php?action=get_unread_count')
+            .then(r => r.json())
+            .then(data => {
+                const badge = document.getElementById('nav-chat-badge');
+                if (!badge) return;
+                if (data.count > 0) {
+                    badge.textContent = data.count > 9 ? '9+' : data.count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }).catch(() => {});
+    }
+    checkUnread();
+    setInterval(checkUnread, 8000);
+})();
+</script>

@@ -464,7 +464,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photos'])) {
 
                         <div class="form-group">
                             <label for="color">Цвет</label>
-                            <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($car['color']); ?>">
+                            <select id="color" name="color">
+                                <option value="">Выберите цвет</option>
+                                <option value="Черный" <?php echo ($car['color'] === 'Черный' || $car['color'] === '⚫') ? 'selected' : ''; ?>>Черный</option>
+                                <option value="Белый" <?php echo ($car['color'] === 'Белый' || $car['color'] === '⚪') ? 'selected' : ''; ?>>Белый</option>
+                                <option value="Красный" <?php echo ($car['color'] === 'Красный' || $car['color'] === '🔴' || $car['color'] === '🟥') ? 'selected' : ''; ?>>Красный</option>
+                                <option value="Синий" <?php echo ($car['color'] === 'Синий' || $car['color'] === '🔵' || $car['color'] === '🟦') ? 'selected' : ''; ?>>Синий</option>
+                                <option value="Зеленый" <?php echo ($car['color'] === 'Зеленый' || $car['color'] === '🟢' || $car['color'] === '🟩') ? 'selected' : ''; ?>>Зеленый</option>
+                                <option value="Желтый" <?php echo ($car['color'] === 'Желтый' || $car['color'] === '🟡' || $car['color'] === '🟨') ? 'selected' : ''; ?>>Желтый</option>
+                                <option value="Оранжевый" <?php echo ($car['color'] === 'Оранжевый' || $car['color'] === '🟠' || $car['color'] === '🟧') ? 'selected' : ''; ?>>Оранжевый</option>
+                                <option value="Фиолетовый" <?php echo ($car['color'] === 'Фиолетовый' || $car['color'] === '🟣' || $car['color'] === '🟪') ? 'selected' : ''; ?>>Фиолетовый</option>
+                                <option value="Коричневый" <?php echo ($car['color'] === 'Коричневый' || $car['color'] === '🟤' || $car['color'] === '🟫') ? 'selected' : ''; ?>>Коричневый</option>
+                                <option value="Серебристый" <?php echo ($car['color'] === 'Серебристый') ? 'selected' : ''; ?>>Серебристый</option>
+                            </select>
                         </div>
 
                         <div class="form-group">

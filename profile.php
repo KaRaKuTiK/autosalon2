@@ -911,5 +911,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             });
         });
     </script>
+
+    <?php include 'chat_widget.php'; ?>
 </body>
-</html>
+</html>

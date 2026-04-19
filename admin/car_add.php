@@ -301,7 +301,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="form-group">
                             <label for="color">Цвет</label>
-                            <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($_POST['color'] ?? ''); ?>">
+                            <select id="color" name="color">
+                                <option value="">Выберите цвет</option>
+                                <option value="Черный" <?php echo (($_POST['color'] ?? '') === 'Черный') ? 'selected' : ''; ?>>Черный</option>
+                                <option value="Белый" <?php echo (($_POST['color'] ?? '') === 'Белый') ? 'selected' : ''; ?>>Белый</option>
+                                <option value="Красный" <?php echo (($_POST['color'] ?? '') === 'Красный') ? 'selected' : ''; ?>>Красный</option>
+                                <option value="Синий" <?php echo (($_POST['color'] ?? '') === 'Синий') ? 'selected' : ''; ?>>Синий</option>
+                                <option value="Зеленый" <?php echo (($_POST['color'] ?? '') === 'Зеленый') ? 'selected' : ''; ?>>Зеленый</option>
+                                <option value="Желтый" <?php echo (($_POST['color'] ?? '') === 'Желтый') ? 'selected' : ''; ?>>Желтый</option>
+                                <option value="Оранжевый" <?php echo (($_POST['color'] ?? '') === 'Оранжевый') ? 'selected' : ''; ?>>Оранжевый</option>
+                                <option value="Фиолетовый" <?php echo (($_POST['color'] ?? '') === 'Фиолетовый') ? 'selected' : ''; ?>>Фиолетовый</option>
+                                <option value="Коричневый" <?php echo (($_POST['color'] ?? '') === 'Коричневый') ? 'selected' : ''; ?>>Коричневый</option>
+                                <option value="Серебристый" <?php echo (($_POST['color'] ?? '') === 'Серебристый') ? 'selected' : ''; ?>>Серебристый</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
