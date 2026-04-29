@@ -196,7 +196,8 @@ $admin = checkAdminAuth();
             color:#fff;
             border-bottom-right-radius:4px;
         }
-        .admin-msg-meta { font-size:.72em; color:var(--muted); margin-top:4px; }
+        .admin-msg-meta { font-size:.72em; color:var(--muted); margin-top:4px; display:flex; gap:5px; align-items:center; }
+        .admin-msg-read { font-size:1.1em; color:#4caf50; font-weight:bold; }
         .admin-msg-file {
             display:flex; align-items:center; gap:8px;
             padding:9px 13px;
@@ -439,6 +440,19 @@ async function fetchAdminMessages() {
         renderAdminMessage(msg);
         if (msg.id > lastMsgId) lastMsgId = msg.id;
     });
+
+    if (res.read_up_to) {
+        document.querySelectorAll('.admin-msg.admin').forEach(el => {
+            const id = parseInt(el.dataset.id);
+            if (id <= res.read_up_to) {
+                const metaBlock = el.querySelector('.admin-msg-meta');
+                if (metaBlock && !metaBlock.querySelector('.admin-msg-read')) {
+                    metaBlock.innerHTML += '<span class="admin-msg-read" title="Прочитано">✓✓</span>';
+                }
+            }
+        });
+    }
+
     adminMessages.scrollTop = adminMessages.scrollHeight;
 }
 
@@ -462,7 +476,11 @@ function renderAdminMessage(msg) {
             content += `<a class="admin-msg-file" href="../${escHtml(msg.file_path)}" target="_blank"><i class="fas fa-file"></i>${escHtml(msg.file_name || 'Файл')}</a>`;
         }
     }
-    content += `<div class="admin-msg-meta">${escHtml(senderLabel)} · ${timeStr}</div>`;
+    let metaContent = `${escHtml(senderLabel)} · ${timeStr}`;
+    if (msg.sender === 'admin' && msg.is_read == 1) {
+        metaContent += `<span class="admin-msg-read" title="Прочитано">✓✓</span>`;
+    }
+    content += `<div class="admin-msg-meta">${metaContent}</div>`;
     el.innerHTML = content;
     adminMessages.appendChild(el);
 }

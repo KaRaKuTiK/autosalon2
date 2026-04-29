@@ -30,7 +30,12 @@ try {
         $_SESSION['user'] = $admin; // Для каталога
         $_SESSION['admin'] = $admin; // Для админ-панели
         
-        header("Location: admin/index.php");
+        if (empty($admin['full_name'])) {
+            $_SESSION['require_profile'] = true;
+            header("Location: admin/profile.php");
+        } else {
+            header("Location: admin/index.php");
+        }
         exit();
     } else {
         $_SESSION['error'] = "Неверные данные для входа";

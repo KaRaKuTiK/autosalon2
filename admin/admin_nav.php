@@ -61,6 +61,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <a href="feedback.php" class="nav-tab <?php echo $currentPage == 'feedback.php' ? 'active' : ''; ?>">
         <i class="fas fa-comments"></i> Обратная связь
     </a>
+    <a href="profile.php" class="nav-tab <?php echo $currentPage == 'profile.php' ? 'active' : ''; ?>">
+        <i class="fas fa-user-edit"></i> Профиль
+    </a>
     <a href="chat.php" class="nav-tab <?php echo $currentPage == 'chat.php' ? 'active' : ''; ?>" id="nav-chat-link" style="position:relative;">
         <i class="fas fa-comment-dots"></i> Онлайн чат
         <span id="nav-chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65em;font-weight:700;align-items:center;justify-content:center;border:2px solid #111;"></span>

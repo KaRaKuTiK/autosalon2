@@ -770,6 +770,9 @@ $user = $_SESSION['user'];
                 <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
                 <li><a href="support.php"><i class="fas fa-headset"></i> Поддержка</a></li>
                 <li><a href="about.php" class="active"><i class="fas fa-info-circle"></i> О сайте</a></li>
+                <?php if (isset($_SESSION['admin']) || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin')): ?>
+                <li><a href="admin/index.php" style="color: var(--primary-orange);"><i class="fas fa-shield-alt"></i> Админ панель</a></li>
+                <?php endif; ?>
                 <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
             </ul>
         </div>

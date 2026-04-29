@@ -51,7 +51,12 @@ if ($action === 'get_messages') {
         $sess->execute([$sessionId]);
         $sessionInfo = $sess->fetch(PDO::FETCH_ASSOC);
 
-        echo json_encode(['success' => true, 'messages' => $messages, 'session' => $sessionInfo]);
+        // Получаем максимальный прочитанный ID из сообщений админа
+        $readUpTo = $pdo->prepare("SELECT MAX(id) FROM chat_messages WHERE session_id = ? AND sender = 'admin' AND is_read = 1");
+        $readUpTo->execute([$sessionId]);
+        $readUpToId = $readUpTo->fetchColumn();
+
+        echo json_encode(['success' => true, 'messages' => $messages, 'session' => $sessionInfo, 'read_up_to' => $readUpToId]);
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }

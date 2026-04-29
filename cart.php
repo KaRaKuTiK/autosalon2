@@ -8,7 +8,22 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+$user = $_SESSION['user'];
 $user_id = $user['id'];
+
+// Обработка удаления автомобиля из корзины (Проблема 2)
+if (isset($_GET['delete'])) {
+    $delete_car_id = (int)$_GET['delete'];
+    try {
+        $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND car_id = ?");
+        $stmt->execute([$user_id, $delete_car_id]);
+        $_SESSION['success'] = "Автомобиль успешно удален из корзины!";
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Ошибка при удалении: " . $e->getMessage();
+    }
+    header("Location: cart.php");
+    exit();
+}
 
 // Получаем товары в корзине пользователя
 try {
@@ -725,6 +740,9 @@ try {
                 <li><a href="cart.php" class="active"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
                 <li><a href="support.php"><i class="fas fa-headset"></i> Поддержка</a></li>
                 <li><a href="about.php"><i class="fas fa-info-circle"></i> О сайте</a></li>
+                <?php if (isset($_SESSION['admin']) || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin')): ?>
+                <li><a href="admin/index.php" style="color: var(--primary-orange);"><i class="fas fa-shield-alt"></i> Админ панель</a></li>
+                <?php endif; ?>
                 <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
             </ul>
         </div>
@@ -816,7 +834,7 @@ try {
                                     <div class="price"><?php echo number_format($item['price'], 0, ',', ' '); ?> ₽</div>
                                     <div class="total-price">Итого: <?php echo number_format($item['total_price'], 0, ',', ' '); ?> ₽</div>
                                 </div>
-                                <a href="remove_from_cart.php?id=<?php echo $item['cart_id']; ?>" class="remove-btn" onclick="return confirm('Удалить автомобиль из корзины?')">
+                                <a href="cart.php?delete=<?php echo $item['id']; ?>" class="remove-btn" onclick="return confirm('Удалить автомобиль из корзины?')">
                                     <i class="fas fa-trash"></i> Удалить
                                 </a>
                             </div>
@@ -930,14 +948,8 @@ try {
             });
         });
 
-        // Подтверждение удаления
-        document.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Вы уверены, что хотите удалить этот автомобиль из корзины?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+        // Подтверждение удаления - удалено во избежание двойного confirm
+        // (уже есть onclick в самом элементе)
 
         // Модальное окно и логика
         const modal = document.getElementById('testDriveModal');

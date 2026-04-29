@@ -607,6 +607,23 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .cars-count strong {
             color: var(--primary-orange);
         }
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(40, 40, 40, 0.8);
+            border: 1px solid var(--border-dark);
+            border-radius: 15px;
+            color: var(--text-light);
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.2);
+            background: rgba(50, 50, 50, 0.9);
+        }
     </style>
 </head>
 <body>
@@ -660,6 +677,9 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="results-count">
                         <i class="fas fa-car"></i> Найдено автомобилей: <strong><?php echo count($cars); ?></strong>
                     </div>
+                </div>
+                <div class="search-container" style="margin-bottom: 25px;">
+                    <input type="text" id="searchInput" placeholder="Поиск по названию..." class="search-input">
                 </div>
                 <div class="filter-buttons">
                     <a href="dashboard.php" class="filter-btn <?php echo empty($type_filter) ? 'active' : ''; ?>">
@@ -716,10 +736,9 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             'Land Rover' => 'fas fa-truck-monster'
                         ];
                         ?>
-                        <div class="car-badge" style="z-index: 2;">
-                            <i class="<?php echo $carIcons[$car['brand']] ?? 'fas fa-car'; ?>"></i>
-                            <?php echo htmlspecialchars($car['type']); ?>
-                        </div>
+                        <?php
+                        // Удален вывод оранжевого бейджа поверх карточки, как и просил клиент
+                        ?>
                     </div>
                     <div class="car-info">
                         <div class="car-header">
@@ -797,14 +816,58 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 if (this.getAttribute('href').startsWith('dashboard.php')) {
-                    e.preventDefault();
-                    const url = this.getAttribute('href');
-                    window.location.href = url;
+                    // e.preventDefault();
                 }
             });
         });
+
+        // Поиск по названию (клиентская фильтрация)
+        const searchInput = document.getElementById('searchInput');
+        const carCards = document.querySelectorAll('.car-card');
+        const carsCountElement = document.querySelector('.results-count strong');
+        const totalCarsCount = document.querySelector('.cars-count strong');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                let visibleCount = 0;
+
+                carCards.forEach(card => {
+                    // Ищем название машины (марка + модель)
+                    const carName = card.querySelector('.car-title').textContent.toLowerCase();
+                    if (carName.includes(query)) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Обновляем счетчики только визуально
+                if (carsCountElement) carsCountElement.textContent = visibleCount;
+                if (totalCarsCount) totalCarsCount.textContent = visibleCount;
+
+                // Управление сообщением "Не найдено"
+                let noResultsMsg = document.getElementById('noResultsMessage');
+                if (visibleCount === 0) {
+                    if (!noResultsMsg) {
+                        const grid = document.querySelector('.cars-grid');
+                        noResultsMsg = document.createElement('div');
+                        noResultsMsg.id = 'noResultsMessage';
+                        noResultsMsg.className = 'empty-state';
+                        noResultsMsg.innerHTML = '<i class="fas fa-search" style="font-size: 4em; color: var(--primary-orange); margin-bottom: 20px; opacity: 0.5; display:block; text-align:center;"></i><h3 style="text-align:center; color: var(--text-light); font-size: 1.5em;">Автомобили не найдены</h3>';
+                        grid.parentNode.insertBefore(noResultsMsg, grid.nextSibling);
+                    }
+                    noResultsMsg.style.display = 'block';
+                } else {
+                    if (noResultsMsg) {
+                        noResultsMsg.style.display = 'none';
+                    }
+                }
+            });
+        }
     </script>
 
     <?php include 'chat_widget.php'; ?>
 </body>
-</html>
+</html>

@@ -7,6 +7,32 @@
 $isLoggedIn = isset($_SESSION['user']);
 $userName = $isLoggedIn ? htmlspecialchars($_SESSION['user']['full_name']) : '';
 $userEmail = $isLoggedIn ? htmlspecialchars($_SESSION['user']['email'] ?? '') : '';
+$isAdmin = isset($_SESSION['admin']) || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin');
+if ($isAdmin) return; // Скрываем чат для администраторов
+
+// Получаем данные администратора
+$chatAdminName = 'Онлайн-поддержка';
+$chatAdminAvatar = '<i class="fas fa-headset"></i>';
+try {
+    global $pdo;
+    if (isset($pdo)) {
+        // Пытаемся получить имя и аватар администратора
+        // Обернуто в try-catch на случай если колонки avatar нет
+        $stmtAdmin = $pdo->prepare("SELECT full_name, avatar FROM users WHERE role = 'admin' LIMIT 1");
+        $stmtAdmin->execute();
+        $adminInfo = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
+        if ($adminInfo) {
+            if (!empty($adminInfo['full_name'])) {
+                $chatAdminName = htmlspecialchars($adminInfo['full_name']);
+            }
+            if (!empty($adminInfo['avatar'])) {
+                $chatAdminAvatar = '<img src="' . htmlspecialchars($adminInfo['avatar']) . '" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Если произошла ошибка (например, нет поля avatar), остаются дефолтные значения
+}
 ?>
 
 <!-- ═══════════════════════════ CHAT WIDGET ═══════════════════════════ -->
@@ -218,7 +244,9 @@ $userEmail = $isLoggedIn ? htmlspecialchars($_SESSION['user']['email'] ?? '') : 
     border: 1px solid rgba(255,102,0,0.2);
     border-bottom-left-radius: 4px;
 }
-.msg-time { font-size: 0.72em; color: #555; margin-top: 3px; }
+.msg-time-row { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin-top: 3px; }
+.msg-time { font-size: 0.72em; color: #555; }
+.msg-read { font-size: 0.75em; color: #51cf66; font-weight: bold; }
 
 /* Файлы в чате */
 .msg-file {
@@ -380,9 +408,9 @@ $userEmail = $isLoggedIn ? htmlspecialchars($_SESSION['user']['email'] ?? '') : 
 
     <!-- Шапка -->
     <div class="chat-header">
-        <div class="chat-header-avatar"><i class="fas fa-headset"></i></div>
+        <div class="chat-header-avatar"><?php echo $chatAdminAvatar; ?></div>
         <div class="chat-header-info">
-            <div class="chat-header-title">Онлайн-поддержка</div>
+            <div class="chat-header-title"><?php echo $chatAdminName; ?></div>
             <div class="chat-header-status">Онлайн — ответим быстро</div>
         </div>
         <button class="chat-header-close" id="chat-close-btn" title="Закрыть"><i class="fas fa-times"></i></button>
@@ -598,13 +626,25 @@ async function fetchMessages() {
     if (!res.success) return;
 
     res.messages.forEach(msg => {
-        renderMessage(msg);
+        renderMessage(msg, res.admin_info);
         if (msg.id > lastMsgId) lastMsgId = msg.id;
         if (msg.sender === 'admin' && !isOpen) {
             unreadCount++;
             updateBadge();
         }
     });
+
+    if (res.read_up_to) {
+        document.querySelectorAll('.chat-msg.user').forEach(el => {
+            const id = parseInt(el.dataset.id);
+            if (id <= res.read_up_to) {
+                const timeRow = el.querySelector('.msg-time-row');
+                if (timeRow && !timeRow.querySelector('.msg-read')) {
+                    timeRow.innerHTML += '<span class="msg-read" title="Прочитано">✓✓</span>';
+                }
+            }
+        });
+    }
 
     if (res.status === 'closed' && !chatClosed) {
         chatClosed = true;
@@ -615,12 +655,21 @@ async function fetchMessages() {
 }
 
 // ─── РЕНДЕР СООБЩЕНИЙ ─────────────────────────────────────────────────────
-function renderMessage(msg) {
+function renderMessage(msg, adminInfo = null) {
     const el = document.createElement('div');
     el.className = `chat-msg ${msg.sender}`;
     el.dataset.id = msg.id;
 
     let content = '';
+
+    if (msg.sender === 'admin') {
+        const avatarUrl = msg.admin_avatar ? escapeHtml(msg.admin_avatar) : (adminInfo && adminInfo.avatar ? escapeHtml(adminInfo.avatar) : '');
+        const adminName = msg.admin_name ? escapeHtml(msg.admin_name) : (adminInfo && adminInfo.full_name ? escapeHtml(adminInfo.full_name) : 'Администратор');
+        let avatarBlock = avatarUrl ? `<img src="${avatarUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,102,0,0.3);">` : `<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,102,0,0.15);display:flex;align-items:center;justify-content:center;color:#ff6600;font-size:0.85em;flex-shrink:0;"><i class="fas fa-headset"></i></div>`;
+        content += `<div style="display:flex; align-items:flex-end; gap:8px;">${avatarBlock}<div style="display:flex; flex-direction:column; max-width: 100%;">`;
+        content += `<div style="font-size:0.75em; color:#888; margin-bottom:3px; margin-left:2px;">${adminName}</div>`;
+    }
+
     if (msg.message) {
         content += `<div class="msg-bubble">${escapeHtml(msg.message)}</div>`;
     }
@@ -636,7 +685,17 @@ function renderMessage(msg) {
 
     const d = new Date(msg.created_at.replace(' ', 'T'));
     const timeStr = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    content += `<div class="msg-time">${timeStr}</div>`;
+    let timeRow = `<div class="msg-time-row"><div class="msg-time">${timeStr}</div>`;
+    if (msg.sender === 'user' && msg.is_read == 1) {
+        timeRow += '<span class="msg-read" title="Прочитано">✓✓</span>';
+    }
+    timeRow += `</div>`;
+    content += timeRow;
+
+    if (msg.sender === 'admin') {
+        content += `</div></div>`;
+    }
+
     el.innerHTML = content;
     messagesEl.appendChild(el);
     messagesEl.scrollTop = messagesEl.scrollHeight;

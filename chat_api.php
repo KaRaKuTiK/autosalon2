@@ -149,7 +149,17 @@ if ($action === 'get_messages') {
         $pdo->prepare("UPDATE chat_messages SET is_read = 1 WHERE session_id = ? AND sender = 'admin' AND is_read = 0")->execute([$session['id']]);
     }
 
-    echo json_encode(['success' => true, 'messages' => $messages, 'status' => $session['status']]);
+    // Получаем инфо об админе (для отображения аватара и имени)
+    $stmtAdmin = $pdo->prepare("SELECT full_name, avatar FROM users WHERE role = 'admin' LIMIT 1");
+    $stmtAdmin->execute();
+    $adminInfo = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
+
+    // Получаем максимальный прочитанный ID
+    $readUpTo = $pdo->prepare("SELECT MAX(id) FROM chat_messages WHERE session_id = ? AND sender = 'user' AND is_read = 1");
+    $readUpTo->execute([$session['id']]);
+    $readUpToId = $readUpTo->fetchColumn();
+
+    echo json_encode(['success' => true, 'messages' => $messages, 'status' => $session['status'], 'admin_info' => $adminInfo, 'read_up_to' => $readUpToId]);
     exit;
 }
 
