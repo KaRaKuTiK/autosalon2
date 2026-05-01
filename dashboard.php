@@ -8,6 +8,12 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+$user_id = $user['id'];
+
+// Получаем избранные авто
+$fav_stmt = $pdo->prepare("SELECT car_id FROM favorites WHERE user_id = ?");
+$fav_stmt->execute([$user_id]);
+$favorites = $fav_stmt->fetchAll(PDO::FETCH_COLUMN);
 
 // Обработка фильтров
 $type_filter = $_GET['type'] ?? '';
@@ -647,6 +653,7 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <ul class="nav-links">
                 <li><a href="dashboard.php" class="active"><i class="fas fa-car"></i> Каталог</a></li>
                 <li><a href="profile.php"><i class="fas fa-user"></i> Личный кабинет</a></li>
+                <li><a href="favorites.php"><i class="fas fa-heart"></i> Избранное</a></li>
                 <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
                 <li><a href="support.php"><i class="fas fa-headset"></i> Поддержка</a></li>
                 <li><a href="about.php"><i class="fas fa-info-circle"></i> О сайте</a></li>
@@ -772,13 +779,14 @@ $cars = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <p class="car-description"><?php echo htmlspecialchars($car['description']); ?></p>
                         <div class="car-actions">
                             <form action="add_to_cart.php" method="POST" style="display: inline;">
-    <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
-    <button type="submit" class="btn btn-primary">
-        <i class="fas fa-shopping-cart"></i> В корзину
-    </button>
-</form>
-                            <a href="#" class="btn btn-secondary">
-                                <i class="fas fa-heart"></i> В избранное
+                                <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-shopping-cart"></i> В корзину
+                                </button>
+                            </form>
+                            <?php $is_favorite = in_array($car['id'], $favorites); ?>
+                            <a href="toggle_favorite.php?car_id=<?php echo $car['id']; ?>" class="btn <?php echo $is_favorite ? 'btn-primary' : 'btn-secondary'; ?>" <?php if ($is_favorite) echo 'style="background: #dc3545; border-color: #dc3545; color: white;"'; ?>>
+                                <i class="fas fa-heart"></i> <?php echo $is_favorite ? 'В избранном' : 'В избранное'; ?>
                             </a>
                         </div>
                     </div>

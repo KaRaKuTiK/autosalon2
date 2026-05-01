@@ -12,12 +12,16 @@ $user = $_SESSION['user'];
 $user_id = $user['id'];
 
 // Обработка удаления автомобиля из корзины (Проблема 2)
-if (isset($_GET['delete'])) {
-    $delete_car_id = (int)$_GET['delete'];
+if (isset($_POST['delete_item_id'])) {
+    $delete_cart_id = (int)$_POST['delete_item_id'];
     try {
-        $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND car_id = ?");
-        $stmt->execute([$user_id, $delete_car_id]);
-        $_SESSION['success'] = "Автомобиль успешно удален из корзины!";
+        $stmt = $pdo->prepare("DELETE FROM cart WHERE id = ? AND user_id = ?");
+        $stmt->execute([$delete_cart_id, $user_id]);
+        if ($stmt->rowCount() > 0) {
+            $_SESSION['success'] = "Автомобиль успешно удален из корзины!";
+        } else {
+            $_SESSION['error'] = "Не удалось удалить автомобиль (возможно, он уже удален).";
+        }
     } catch (PDOException $e) {
         $_SESSION['error'] = "Ошибка при удалении: " . $e->getMessage();
     }
@@ -29,7 +33,8 @@ if (isset($_GET['delete'])) {
 try {
     $stmt = $pdo->prepare("
         SELECT c.*, cr.id as cart_id, cr.quantity, cr.added_at, 
-               (c.price * cr.quantity) as total_price
+               (c.price * cr.quantity) as total_price,
+               (SELECT image_path FROM car_images WHERE car_id = c.id AND is_main = 1 LIMIT 1) as main_image
         FROM cart cr 
         JOIN cars c ON cr.car_id = c.id 
         WHERE cr.user_id = ? 
@@ -737,6 +742,7 @@ try {
             <ul class="nav-links">
                 <li><a href="dashboard.php"><i class="fas fa-car"></i> Каталог</a></li>
                 <li><a href="profile.php"><i class="fas fa-user"></i> Личный кабинет</a></li>
+                <li><a href="favorites.php"><i class="fas fa-heart"></i> Избранное</a></li>
                 <li><a href="cart.php" class="active"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
                 <li><a href="support.php"><i class="fas fa-headset"></i> Поддержка</a></li>
                 <li><a href="about.php"><i class="fas fa-info-circle"></i> О сайте</a></li>
@@ -790,19 +796,23 @@ try {
                         <?php foreach ($cart_items as $item): ?>
                         <div class="cart-item">
                             <div class="car-image">
-                                <?php 
-                                $carImages = [
-                                    'Toyota' => '🚗',
-                                    'BMW' => '🚙', 
-                                    'Porsche' => '🏎️',
-                                    'Honda' => '🚘',
-                                    'Audi' => '🚗',
-                                    'Ferrari' => '🏎️',
-                                    'Kia' => '🚗',
-                                    'Land Rover' => '🚙'
-                                ];
-                                echo $carImages[$item['brand']] ?? '🚗';
-                                ?>
+                                <?php if (!empty($item['main_image'])): ?>
+                                    <img src="<?php echo htmlspecialchars($item['main_image']); ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                                <?php else: ?>
+                                    <?php 
+                                    $carImages = [
+                                        'Toyota' => '🚗',
+                                        'BMW' => '🚙', 
+                                        'Porsche' => '🏎️',
+                                        'Honda' => '🚘',
+                                        'Audi' => '🚗',
+                                        'Ferrari' => '🏎️',
+                                        'Kia' => '🚗',
+                                        'Land Rover' => '🚙'
+                                    ];
+                                    echo $carImages[$item['brand']] ?? '🚗';
+                                    ?>
+                                <?php endif; ?>
                             </div>
                             <div class="car-details">
                                 <h3 class="car-title"><?php echo htmlspecialchars($item['brand'] . ' ' . $item['model']); ?></h3>
@@ -834,9 +844,12 @@ try {
                                     <div class="price"><?php echo number_format($item['price'], 0, ',', ' '); ?> ₽</div>
                                     <div class="total-price">Итого: <?php echo number_format($item['total_price'], 0, ',', ' '); ?> ₽</div>
                                 </div>
-                                <a href="cart.php?delete=<?php echo $item['id']; ?>" class="remove-btn" onclick="return confirm('Удалить автомобиль из корзины?')">
-                                    <i class="fas fa-trash"></i> Удалить
-                                </a>
+                                <form action="cart.php" method="POST" style="margin: 0; padding: 0;">
+                                    <input type="hidden" name="delete_item_id" value="<?php echo $item['cart_id']; ?>">
+                                    <button type="submit" class="remove-btn">
+                                        <i class="fas fa-trash"></i> Удалить
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         <?php endforeach; ?>

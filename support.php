@@ -788,6 +788,7 @@ try {
             <ul class="nav-links">
                 <li><a href="dashboard.php"><i class="fas fa-car"></i> Каталог</a></li>
                 <li><a href="profile.php"><i class="fas fa-user"></i> Личный кабинет</a></li>
+                <li><a href="favorites.php"><i class="fas fa-heart"></i> Избранное</a></li>
                 <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
                 <li><a href="support.php" class="active"><i class="fas fa-headset"></i> Поддержка</a></li>
                 <li><a href="about.php"><i class="fas fa-info-circle"></i> О сайте</a></li>
