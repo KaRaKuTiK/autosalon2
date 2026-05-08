@@ -31,8 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $wishes = htmlspecialchars($wishes);
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO test_drive_requests (full_name, salon_address, phone, view_date, view_time, payment_method, wishes) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$full_name, $salon_address, $phone, $view_date, $view_time, $payment_method, $wishes]);
+        $user_id = $_SESSION['user']['id'] ?? null;
+        $stmt = $pdo->prepare("INSERT INTO test_drive_requests (user_id, full_name, salon_address, phone, view_date, view_time, payment_method, wishes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$user_id, $full_name, $salon_address, $phone, $view_date, $view_time, $payment_method, $wishes]);
         
         // TODO: Заглушка отправки email
         // mail("admin@autosalon.ru", "Новая запись на просмотр", "Запись от $full_name на $view_date $view_time. Телефон: $phone");

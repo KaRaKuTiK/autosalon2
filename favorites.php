@@ -94,19 +94,16 @@ $favorites = array_column($cars, 'id');
     <div class="nav-menu">
         <div class="container">
             <ul class="nav-links">
-                <?php if (isset($_SESSION['admin'])): ?>
-                    <li><a href="admin/index.php"><i class="fas fa-shield-alt"></i> Админ панель</a></li>
-                    <li><a href="favorites.php" class="active"><i class="fas fa-heart"></i> Избранное</a></li>
-                    <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
-                <?php else: ?>
-                    <li><a href="dashboard.php"><i class="fas fa-car"></i> Каталог</a></li>
-                    <li><a href="profile.php"><i class="fas fa-user"></i> Личный кабинет</a></li>
-                    <li><a href="favorites.php" class="active"><i class="fas fa-heart"></i> Избранное</a></li>
-                    <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
-                    <li><a href="support.php"><i class="fas fa-headset"></i> Поддержка</a></li>
-                    <li><a href="about.php"><i class="fas fa-info-circle"></i> О сайте</a></li>
-                    <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-car"></i> Каталог</a></li>
+                <li><a href="profile.php"><i class="fas fa-user"></i> Личный кабинет</a></li>
+                <li><a href="favorites.php" class="active"><i class="fas fa-heart"></i> Избранное</a></li>
+                <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> Корзина</a></li>
+                <li><a href="support.php"><i class="fas fa-headset"></i> Поддержка</a></li>
+                <li><a href="about.php"><i class="fas fa-info-circle"></i> О сайте</a></li>
+                <?php if (isset($_SESSION['admin']) || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin')): ?>
+                <li><a href="admin/index.php" style="color: var(--primary-orange);"><i class="fas fa-shield-alt"></i> Админ панель</a></li>
                 <?php endif; ?>
+                <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
             </ul>
         </div>
     </div>
