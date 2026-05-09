@@ -119,6 +119,10 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     </form>
 
     <a href="index.php" class="back-link">&larr; Вернуться на главный сайт</a>
+    <br><br>
+    <a href="admin_register.php" class="back-link" style="color: var(--primary-orange);">
+        <i class="fas fa-user-plus"></i> Регистрация админа
+    </a>
 </div>
 
 </body>
